@@ -1,0 +1,39 @@
+:root {
+  --sky-top: #8EDBFF;
+  --sky-bottom: #E6F7FF;
+  --train-red: #FF5A5F;
+  --train-yellow: #FFD23F;
+  --train-green: #3DDC84;
+  --train-blue: #3A86FF;
+  --train-purple: #8338EC;
+  --train-orange: #FF9F1C;
+  --clock-face: #FFF8E7;
+  --navy-text: #1B2A49;
+  --navy-border: #1B2A49;
+  --platform-wood: #8B5A2B;
+  --platform-stone: #CBD5E1;
+  --signal-red: #EF4444;
+  --signal-amber: #F59E0B;
+  --signal-green: #10B981;
+
+  /* Level Accent Defaults */
+  --level-accent: #3A86FF;
+
+  /* Text scaling */
+  --text-base-size: 18px;
+  --text-heading-size: 28px;
+}
+
+body.large-text {
+  --text-base-size: 22px;
+  --text-heading-size: 34px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, ::before, ::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}

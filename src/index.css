@@ -1,0 +1,22 @@
+@import './styles/tokens.css';
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  body {
+    font-size: var(--text-base-size);
+    color: var(--navy-text);
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
+  }
+}
+
+@layer utilities {
+  .touch-none {
+    touch-action: none;
+  }
+  .focus-ring {
+    @apply focus:outline-none focus:ring-4 focus:ring-amber-400 focus:ring-offset-2;
+  }
+}
