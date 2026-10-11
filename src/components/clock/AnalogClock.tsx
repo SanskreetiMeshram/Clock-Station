@@ -15,6 +15,7 @@ export interface AnalogClockProps {
   showHalfSlice?: boolean;
   accentColor?: string;
   size?: number;
+  isDropTargetHovered?: boolean;
   onChange?: (newTime: ClockTime) => void;
   onSnap?: () => void;
   className?: string;
@@ -47,6 +48,7 @@ export const AnalogClock: React.FC<AnalogClockProps> = ({
   showHalfSlice = false,
   accentColor = '#FF9F1C',
   size,
+  isDropTargetHovered = false,
   onChange,
   onSnap,
   className = '',
@@ -122,7 +124,12 @@ export const AnalogClock: React.FC<AnalogClockProps> = ({
   });
 
   return (
-    <div className={`relative inline-flex flex-col items-center select-none ${className}`}>
+    <div
+      data-droptarget="analog-clock-face"
+      className={`relative inline-flex flex-col items-center select-none transition-transform duration-200 ${
+        isDropTargetHovered ? 'scale-105' : ''
+      } ${className}`}
+    >
       {/* Floating digital readout bubble */}
       {showDigitalBubble && (
         <div
@@ -147,9 +154,10 @@ export const AnalogClock: React.FC<AnalogClockProps> = ({
         <defs>
           {/* Bevel gradient for clock rim */}
           <radialGradient id={`rim-grad-${filterId}`} cx="50%" cy="50%" r="50%">
-            <stop offset="85%" stopColor={accentColor} />
-            <stop offset="97%" stopColor="#1B2A49" stopOpacity="0.4" />
-            <stop offset="100%" stopColor="#000000" stopOpacity="0.6" />
+            <stop offset="78%" stopColor={accentColor} />
+            <stop offset="90%" stopColor="#F59E0B" />
+            <stop offset="96%" stopColor="#1B2A49" stopOpacity="0.8" />
+            <stop offset="100%" stopColor="#0B132B" />
           </radialGradient>
 
           {/* Clock face inner shadow gradient */}
@@ -190,7 +198,7 @@ export const AnalogClock: React.FC<AnalogClockProps> = ({
           fill="none"
           stroke="#FFFFFF"
           strokeWidth="3"
-          strokeOpacity="0.4"
+          strokeOpacity="0.45"
         />
 
         {/* Inner Clock Face */}
@@ -201,6 +209,28 @@ export const AnalogClock: React.FC<AnalogClockProps> = ({
           fill={`url(#face-grad-${filterId})`}
           stroke="#E2E8F0"
           strokeWidth="2"
+        />
+
+        {/* Drop Target Hover Pulse Ring */}
+        {isDropTargetHovered && (
+          <circle
+            cx="200"
+            cy="200"
+            r="174"
+            fill="none"
+            stroke="#F59E0B"
+            strokeWidth="8"
+            strokeDasharray="14 10"
+            className="animate-spin pointer-events-none"
+          />
+        )}
+
+        {/* Curved Glass Dome Reflection Arc */}
+        <path
+          d="M 65 140 C 95 65 210 42 320 75 C 338 82 342 90 342 90 C 310 65 205 52 110 90 C 80 102 65 140 65 140 Z"
+          fill="#FFFFFF"
+          fillOpacity="0.35"
+          className="pointer-events-none select-none"
         />
 
         {/* Slices for Half-Past & Quarter Hints */}

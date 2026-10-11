@@ -15,6 +15,7 @@ import { TrainScene } from '../scene/TrainScene';
 import type { TrainState, SignalState } from '../scene/TrainScene';
 import { Mascot } from '../scene/Mascot';
 import { AnswerChoices } from '../game/AnswerChoices';
+import { TimeChipsDrawer } from '../clock/TimeChipsDrawer';
 import { HintOverlay } from '../game/HintOverlay';
 import { Confetti } from '../game/Confetti';
 import { useSpeech } from '../../hooks/useSpeech';
@@ -78,8 +79,17 @@ const QuestionPlayArea: React.FC<QuestionPlayAreaProps> = ({
 
   const [trainState, setTrainState] = useState<TrainState>('arriving');
   const [signalState, setSignalState] = useState<SignalState>('red');
-  const [mascotMessage, setMascotMessage] = useState<string>(strings.mascot.helpPrompt);
+  const [mascotMessage, setMascotMessage] = useState<string>(() =>
+    question.type === 'read_clock'
+      ? 'Read the clock and drop the matching boarding ticket onto the train! 🎫'
+      : strings.mascot.helpPrompt
+  );
   const [isEvaluating, setIsEvaluating] = useState(false);
+
+  // Drag and drop interaction states
+  const [isDraggingTicket, setIsDraggingTicket] = useState(false);
+  const [hoveredDropTarget, setHoveredDropTarget] = useState<string | null>(null);
+  const [clockDropTargetHovered, setClockDropTargetHovered] = useState(false);
 
   const { speak, isSpeaking } = useSpeech();
 
@@ -96,23 +106,19 @@ const QuestionPlayArea: React.FC<QuestionPlayAreaProps> = ({
     speak(question.readAloudText || question.promptText);
   }, [question, speak]);
 
-  const handleGo = () => {
+  const handleEvaluateAnswer = (answerToCheck: ClockTime) => {
     if (isEvaluating) return;
-
-    const answerToCheck = question.type === 'read_clock' ? selectedChoice : clockTime;
-    if (!answerToCheck) {
-      setMascotMessage('Pick a digital time from the buttons first! 👆');
-      playBoing();
-      return;
-    }
-
     setIsEvaluating(true);
     const correct = isCorrect(question.targetTime, answerToCheck);
 
     if (correct) {
       setSignalState('green');
       playWhistle();
+      // Realistic accelerating chuffs as train departs
       playChuff();
+      setTimeout(playChuff, 350);
+      setTimeout(playChuff, 700);
+      setTimeout(playChuff, 1050);
       setTrainState('departing');
 
       const cheers = strings.mascot.correctCelebration;
@@ -155,6 +161,32 @@ const QuestionPlayArea: React.FC<QuestionPlayAreaProps> = ({
     }
   };
 
+  const handleGo = () => {
+    if (isEvaluating) return;
+    const answerToCheck = question.type === 'read_clock' ? selectedChoice : clockTime;
+    if (!answerToCheck) {
+      setMascotMessage('Pick a digital time from the buttons first! 👆');
+      playBoing();
+      return;
+    }
+    handleEvaluateAnswer(answerToCheck);
+  };
+
+  const handleDropTicket = (droppedChoice: ClockTime) => {
+    setSelectedChoice(droppedChoice);
+    handleEvaluateAnswer(droppedChoice);
+  };
+
+  const handleApplyDeltaMinutes = (deltaMin: number) => {
+    playTick();
+    setClockTime((prev) => {
+      const totalMinutes = prev.h * 60 + prev.m + deltaMin;
+      const newH = Math.floor(totalMinutes / 60) % 12 || 12;
+      const newM = totalMinutes % 60;
+      return { h: newH, m: newM };
+    });
+  };
+
   const handleDismissHint = () => {
     setShowHintModal(false);
     if (revealedSolution) {
@@ -170,7 +202,7 @@ const QuestionPlayArea: React.FC<QuestionPlayAreaProps> = ({
     <>
       <main className="w-full max-w-5xl mx-auto my-auto py-3">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 lg:gap-6 items-center">
-          {/* Clock Display */}
+          {/* Clock Display & Interactive Time Jump Chips */}
           <div className="flex flex-col items-center justify-center p-3 bg-white/70 backdrop-blur-sm rounded-3xl border-4 border-[#1B2A49] shadow-chunky">
             {isTwinMode ? (
               <div className="flex flex-col sm:flex-row items-center gap-4 w-full justify-around">
@@ -180,6 +212,7 @@ const QuestionPlayArea: React.FC<QuestionPlayAreaProps> = ({
                   mode={question.clockMode}
                   snapStep={question.snapStep}
                   accentColor={accentColor}
+                  isDropTargetHovered={clockDropTargetHovered}
                   onChange={setClockTime}
                   onSnap={playTick}
                   size={260}
@@ -203,9 +236,23 @@ const QuestionPlayArea: React.FC<QuestionPlayAreaProps> = ({
                 showMultiplierHint={diagnostic?.showMultiplierHint}
                 showHalfSlice={diagnostic?.showHalfSlice}
                 showQuarterSlice={diagnostic?.showQuarterSlice}
+                isDropTargetHovered={clockDropTargetHovered}
                 onChange={setClockTime}
                 onSnap={playTick}
               />
+            )}
+
+            {/* Quick-Advance Draggable Time Chips when setting clock */}
+            {!isReadMode && (
+              <div className="mt-3 w-full">
+                <TimeChipsDrawer
+                  onApplyDeltaMinutes={handleApplyDeltaMinutes}
+                  onDragStateChange={(_isDragging, activeTarget) => {
+                    setClockDropTargetHovered(activeTarget === 'analog-clock-face');
+                  }}
+                  disabled={isEvaluating}
+                />
+              </div>
             )}
           </div>
 
@@ -225,6 +272,11 @@ const QuestionPlayArea: React.FC<QuestionPlayAreaProps> = ({
                   onSelect={(c) => {
                     setSelectedChoice(c);
                     playTick();
+                  }}
+                  onDropTicket={handleDropTicket}
+                  onDragStateChange={(isDragging, activeTarget) => {
+                    setIsDraggingTicket(isDragging);
+                    setHoveredDropTarget(activeTarget);
                   }}
                   disabled={isEvaluating}
                 />
@@ -248,6 +300,8 @@ const QuestionPlayArea: React.FC<QuestionPlayAreaProps> = ({
           signalState={signalState}
           locomotiveStyle={locomotiveStyle}
           trainName={question.trainName}
+          isDragActive={isDraggingTicket}
+          isHoveredDropTarget={hoveredDropTarget === 'train-ticket-slot'}
         />
 
         <div className="flex items-center justify-between gap-3">

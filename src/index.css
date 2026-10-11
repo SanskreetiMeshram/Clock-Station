@@ -20,3 +20,113 @@
     @apply focus:outline-none focus:ring-4 focus:ring-amber-400 focus:ring-offset-2;
   }
 }
+
+/* Realistic Train & Steam Mechanical Animations */
+@keyframes wheelSpin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes pistonCrank {
+  0% {
+    transform: translate(0px, 0px);
+  }
+  25% {
+    transform: translate(10px, 7px);
+  }
+  50% {
+    transform: translate(20px, 0px);
+  }
+  75% {
+    transform: translate(10px, -7px);
+  }
+  100% {
+    transform: translate(0px, 0px);
+  }
+}
+
+@keyframes trainIdleBob {
+  0%, 100% {
+    transform: translateY(0px) rotate(0deg);
+  }
+  50% {
+    transform: translateY(-2px) rotate(0.25deg);
+  }
+}
+
+@keyframes steamPuffRealistic {
+  0% {
+    transform: translate(0, 0) scale(0.35);
+    opacity: 0.9;
+  }
+  30% {
+    opacity: 0.85;
+  }
+  100% {
+    transform: translate(-100px, -80px) scale(2.4);
+    opacity: 0;
+  }
+}
+
+@keyframes whistlePlume {
+  0% {
+    transform: translateY(0) scaleY(0.2) scaleX(0.5);
+    opacity: 0;
+  }
+  25% {
+    transform: translateY(-15px) scaleY(1.1) scaleX(1);
+    opacity: 0.95;
+  }
+  100% {
+    transform: translateY(-55px) scaleY(1.8) scaleX(1.6);
+    opacity: 0;
+  }
+}
+
+@keyframes dropTargetPulse {
+  0%, 100% {
+    box-shadow: 0 0 0 0 rgba(251, 191, 36, 0.7);
+    transform: scale(1);
+  }
+  50% {
+    box-shadow: 0 0 15px 5px rgba(251, 191, 36, 0.9);
+    transform: scale(1.02);
+  }
+}
+
+.anim-wheel-spin {
+  animation: wheelSpin 0.7s linear infinite;
+}
+
+.anim-wheel-fast {
+  animation: wheelSpin 0.35s linear infinite;
+}
+
+.anim-piston-crank {
+  animation: pistonCrank 0.7s linear infinite;
+}
+
+.anim-piston-fast {
+  animation: pistonCrank 0.35s linear infinite;
+}
+
+.anim-train-idle {
+  animation: trainIdleBob 2s ease-in-out infinite;
+}
+
+.anim-steam-puff {
+  animation: steamPuffRealistic 1.6s cubic-bezier(0.2, 0.8, 0.4, 1) forwards;
+}
+
+.anim-whistle-steam {
+  animation: whistlePlume 1.2s ease-out infinite;
+}
+
+.anim-drop-target {
+  animation: dropTargetPulse 1.5s infinite;
+}
+
