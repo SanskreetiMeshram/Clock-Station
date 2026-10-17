@@ -200,24 +200,26 @@ const QuestionPlayArea: React.FC<QuestionPlayAreaProps> = ({
 
   return (
     <>
-      <main className="w-full max-w-5xl mx-auto my-auto py-3">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 lg:gap-6 items-center">
-          {/* Clock Display & Interactive Time Jump Chips */}
-          <div className="flex flex-col items-center justify-center p-3 bg-white/70 backdrop-blur-sm rounded-3xl border-4 border-[#1B2A49] shadow-chunky">
+      <main className="flex-1 min-h-0 w-full max-w-7xl mx-auto py-1 sm:py-2 flex flex-col justify-center">
+        <div className="h-full w-full grid grid-cols-1 md:grid-cols-12 gap-3 lg:gap-5 items-stretch min-h-0">
+          {/* LEFT COLUMN: Interactive Clock Station */}
+          <div className="md:col-span-6 lg:col-span-5 h-full flex flex-col items-center justify-between p-3 sm:p-4 bg-white/75 backdrop-blur-sm rounded-3xl border-4 border-[#1B2A49] shadow-chunky min-h-0 overflow-hidden">
             {isTwinMode ? (
-              <div className="flex flex-col sm:flex-row items-center gap-4 w-full justify-around">
-                <AnalogClock
-                  time={clockTime}
-                  interactive={true}
-                  mode={question.clockMode}
-                  snapStep={question.snapStep}
-                  accentColor={accentColor}
-                  isDropTargetHovered={clockDropTargetHovered}
-                  onChange={setClockTime}
-                  onSnap={playTick}
-                  size={260}
-                />
-                <div className="flex flex-col items-center">
+              <div className="flex flex-col sm:flex-row items-center gap-3 w-full justify-around flex-1 min-h-0">
+                <div className="flex-1 min-h-0 flex items-center justify-center">
+                  <AnalogClock
+                    time={clockTime}
+                    interactive={true}
+                    mode={question.clockMode}
+                    snapStep={question.snapStep}
+                    accentColor={accentColor}
+                    isDropTargetHovered={clockDropTargetHovered}
+                    onChange={setClockTime}
+                    onSnap={playTick}
+                    className="max-h-[min(340px,46vh)] aspect-square"
+                  />
+                </div>
+                <div className="flex flex-col items-center shrink-0">
                   <span className="text-xs font-black text-[#1B2A49] mb-1 uppercase tracking-wider">
                     Target Board
                   </span>
@@ -225,26 +227,29 @@ const QuestionPlayArea: React.FC<QuestionPlayAreaProps> = ({
                 </div>
               </div>
             ) : (
-              <AnalogClock
-                time={clockTime}
-                interactive={!isReadMode}
-                mode={question.clockMode}
-                snapStep={question.snapStep}
-                accentColor={accentColor}
-                showDigitalBubble={showBubble}
-                highlight={diagnostic?.highlightHand}
-                showMultiplierHint={diagnostic?.showMultiplierHint}
-                showHalfSlice={diagnostic?.showHalfSlice}
-                showQuarterSlice={diagnostic?.showQuarterSlice}
-                isDropTargetHovered={clockDropTargetHovered}
-                onChange={setClockTime}
-                onSnap={playTick}
-              />
+              <div className="flex-1 min-h-0 w-full flex items-center justify-center p-1">
+                <AnalogClock
+                  time={clockTime}
+                  interactive={!isReadMode}
+                  mode={question.clockMode}
+                  snapStep={question.snapStep}
+                  accentColor={accentColor}
+                  showDigitalBubble={showBubble}
+                  highlight={diagnostic?.highlightHand}
+                  showMultiplierHint={diagnostic?.showMultiplierHint}
+                  showHalfSlice={diagnostic?.showHalfSlice}
+                  showQuarterSlice={diagnostic?.showQuarterSlice}
+                  isDropTargetHovered={clockDropTargetHovered}
+                  onChange={setClockTime}
+                  onSnap={playTick}
+                  className="max-h-[min(360px,50vh)] aspect-square"
+                />
+              </div>
             )}
 
             {/* Quick-Advance Draggable Time Chips when setting clock */}
             {!isReadMode && (
-              <div className="mt-3 w-full">
+              <div className="w-full shrink-0 pt-2">
                 <TimeChipsDrawer
                   onApplyDeltaMinutes={handleApplyDeltaMinutes}
                   onDragStateChange={(_isDragging, activeTarget) => {
@@ -256,16 +261,20 @@ const QuestionPlayArea: React.FC<QuestionPlayAreaProps> = ({
             )}
           </div>
 
-          {/* Departure Board & Interaction Controls */}
-          <div className="flex flex-col justify-between gap-4 h-full">
-            <DepartureBoard
-              question={question}
-              onReadAloud={handleReadAloud}
-              isSpeaking={isSpeaking}
-            />
+          {/* RIGHT COLUMN: Station Board, Tickets, Train Platform & Controls */}
+          <div className="md:col-span-6 lg:col-span-7 h-full flex flex-col justify-between gap-2.5 min-h-0">
+            {/* 1. Departure Board */}
+            <div className="shrink-0">
+              <DepartureBoard
+                question={question}
+                onReadAloud={handleReadAloud}
+                isSpeaking={isSpeaking}
+              />
+            </div>
 
+            {/* 2. Draggable Boarding Tickets in read_clock mode */}
             {isReadMode && question.choices && (
-              <div className="my-2">
+              <div className="shrink-0">
                 <AnswerChoices
                   choices={question.choices}
                   selectedChoice={selectedChoice}
@@ -283,44 +292,42 @@ const QuestionPlayArea: React.FC<QuestionPlayAreaProps> = ({
               </div>
             )}
 
-            <div className="hidden sm:block">
-              <Mascot
-                message={mascotMessage}
-                showGhostHand={levelId === 1 && questionIndex === 0 && attempts === 0}
+            {/* 3. Train Platform on Track (Side-by-Side!) */}
+            <div className="flex-1 min-h-0 w-full flex items-center">
+              <TrainScene
+                trainState={trainState}
+                signalState={signalState}
+                locomotiveStyle={locomotiveStyle}
+                trainName={question.trainName}
+                isDragActive={isDraggingTicket}
+                isHoveredDropTarget={hoveredDropTarget === 'train-ticket-slot'}
+                className="w-full h-full max-h-[175px]"
               />
+            </div>
+
+            {/* 4. Action Row: Conductor Mascot & Big Go Button */}
+            <div className="shrink-0 flex items-center justify-between gap-3">
+              <div className="flex-1 min-w-0">
+                <Mascot
+                  message={mascotMessage}
+                  showGhostHand={levelId === 1 && questionIndex === 0 && attempts === 0}
+                />
+              </div>
+
+              <button
+                type="button"
+                disabled={isEvaluating}
+                onClick={handleGo}
+                className="shrink-0 min-w-[190px] sm:min-w-[230px] min-h-[58px] sm:min-h-[64px] px-6 sm:px-8 py-3 rounded-3xl bg-[#3DDC84] hover:bg-[#34c776] text-[#1B2A49] text-2xl sm:text-3xl font-black border-4 border-[#1B2A49] shadow-chunky active:translate-y-1 active:shadow-chunky-active flex items-center justify-center gap-3 transition-transform focus-ring disabled:opacity-50"
+                aria-label="Send train"
+              >
+                <Play className="w-7 h-7 sm:w-8 sm:h-8 fill-current" />
+                <span>{strings.buttons.go}</span>
+              </button>
             </div>
           </div>
         </div>
       </main>
-
-      {/* Platform & Go Button */}
-      <footer className="w-full max-w-5xl mx-auto flex flex-col gap-3">
-        <TrainScene
-          trainState={trainState}
-          signalState={signalState}
-          locomotiveStyle={locomotiveStyle}
-          trainName={question.trainName}
-          isDragActive={isDraggingTicket}
-          isHoveredDropTarget={hoveredDropTarget === 'train-ticket-slot'}
-        />
-
-        <div className="flex items-center justify-between gap-3">
-          <div className="sm:hidden flex-1">
-            <Mascot message={mascotMessage} />
-          </div>
-
-          <button
-            type="button"
-            disabled={isEvaluating}
-            onClick={handleGo}
-            className="w-full sm:w-auto sm:min-w-[260px] min-h-[64px] ml-auto px-8 py-3.5 rounded-3xl bg-[#3DDC84] hover:bg-[#34c776] text-[#1B2A49] text-3xl font-black border-4 border-[#1B2A49] shadow-chunky active:translate-y-1 active:shadow-chunky-active flex items-center justify-center gap-3 transition-transform focus-ring disabled:opacity-50"
-            aria-label="Send train"
-          >
-            <Play className="w-8 h-8 fill-current" />
-            <span>{strings.buttons.go}</span>
-          </button>
-        </div>
-      </footer>
 
       <HintOverlay
         diagnostic={showHintModal ? diagnostic : null}
@@ -379,7 +386,7 @@ export const PlayScreen: React.FC<PlayScreenProps> = ({
   );
 
   return (
-    <div className="min-h-screen p-3 sm:p-5 bg-gradient-to-b from-[#8EDBFF] via-[#BAE6FD] to-[#E6F7FF] flex flex-col justify-between select-none">
+    <div className="h-screen max-h-screen overflow-hidden p-2 sm:p-3 bg-gradient-to-b from-[#8EDBFF] via-[#BAE6FD] to-[#E6F7FF] flex flex-col justify-between select-none">
       {showSuccessConfetti && <Confetti count={40} />}
 
       <TopBar
@@ -393,6 +400,7 @@ export const PlayScreen: React.FC<PlayScreenProps> = ({
         onToggleMute={onToggleMute}
         onToggleTextSize={onToggleTextSize}
         onPause={onPause}
+        className="shrink-0 max-w-7xl"
       />
 
       <QuestionPlayArea

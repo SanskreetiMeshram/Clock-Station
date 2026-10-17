@@ -41,9 +41,7 @@ export const TrainScene: React.FC<TrainSceneProps> = ({
       trainState === 'arriving'
         ? 'translateX(0px)'
         : trainState === 'departing'
-        ? 'translateX(650px)'
-        : trainState === 'wobble'
-        ? 'translateX(0px)'
+        ? 'translateX(180%)'
         : 'translateX(0px)',
   };
 
@@ -229,10 +227,10 @@ export const TrainScene: React.FC<TrainSceneProps> = ({
       {/* The Train on the Track (Passenger Carriage + Locomotive) */}
       <div
         style={trainMotionStyle}
-        className={`absolute bottom-[10px] left-[50px] w-[500px] sm:w-[560px] z-10 flex items-end ${trainMotionClass}`}
+        className={`absolute bottom-[3%] left-[4%] w-[88%] max-w-[540px] z-10 flex items-end ${trainMotionClass}`}
       >
         {/* Coupled Coach / Tender */}
-        <div className="w-[190px] sm:w-[210px] shrink-0">
+        <div className="w-[38%] shrink-0">
           <TrainCoach
             style={locomotiveStyle}
             isMoving={isMoving}
@@ -241,7 +239,7 @@ export const TrainScene: React.FC<TrainSceneProps> = ({
         </div>
 
         {/* Main Locomotive Engine */}
-        <div className="w-[310px] sm:w-[350px] shrink-0 -ml-4 relative">
+        <div className="w-[62%] shrink-0 -ml-[2%] relative">
           <TrainLocomotive
             style={locomotiveStyle}
             isMoving={isMoving}
@@ -250,7 +248,7 @@ export const TrainScene: React.FC<TrainSceneProps> = ({
 
           {/* Billowing Steam & Whistle Plumes */}
           {(trainState === 'departing' || trainState === 'arriving' || trainState === 'waiting') && (
-            <div className="absolute -top-16 left-[180px] pointer-events-none">
+            <div className="absolute -top-16 left-[50%] pointer-events-none">
               <svg width="240" height="120" className="overflow-visible">
                 {/* Chimney Steam Puffs */}
                 <SmokePuff x={30} y={40} id={1} delayMs={0} scale={1.1} />
@@ -272,7 +270,7 @@ export const TrainScene: React.FC<TrainSceneProps> = ({
         {/* Interactive Drop Target: Ticket Slot on the Train */}
         <div
           data-droptarget="train-ticket-slot"
-          className={`absolute -top-10 left-[60px] sm:left-[80px] z-20 transition-all transform duration-200 ${
+          className={`absolute -top-9 left-[12%] z-20 transition-all transform duration-200 ${
             isDragActive
               ? isHoveredDropTarget
                 ? 'scale-110 -translate-y-2'
