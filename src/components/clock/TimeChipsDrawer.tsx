@@ -67,7 +67,7 @@ const DraggableChip: React.FC<DraggableChipProps> = ({
           }
         }}
         aria-label={`Time jump ${chip.label}. Drag to clock or tap.`}
-        className={`px-3 py-1.5 rounded-full border-2 border-[#1B2A49] font-black text-xs sm:text-sm text-white flex items-center gap-1.5 shadow-chunky-sm transition-transform cursor-grab active:cursor-grabbing hover:-translate-y-0.5 select-none ${
+        className={`px-2.5 py-1 rounded-full border-2 border-[#1B2A49] font-black text-xs text-white flex items-center gap-1 shadow-chunky-sm transition-transform cursor-grab active:cursor-grabbing hover:-translate-y-0.5 select-none ${
           isDragging ? 'opacity-30 scale-90' : 'opacity-100'
         }`}
         style={{ backgroundColor: chip.color }}
@@ -106,12 +106,12 @@ export const TimeChipsDrawer: React.FC<TimeChipsDrawerProps> = ({
 }) => {
   return (
     <div
-      className={`flex flex-wrap items-center justify-center gap-2 p-2 rounded-2xl bg-white/80 border-2 border-[#1B2A49] shadow-sm ${className}`}
+      className={`flex flex-wrap items-center justify-center gap-1.5 p-1.5 rounded-2xl bg-white/90 border-2 border-[#1B2A49] shadow-sm ${className}`}
       role="group"
       aria-label="Quick time advance tokens"
     >
-      <span className="text-xs font-bold text-[#64748B] uppercase tracking-wide mr-1">
-        Quick Jump:
+      <span className="text-[11px] font-black text-[#64748B] uppercase tracking-wide mr-0.5">
+        Jump:
       </span>
       {TIME_CHIPS.map((chip) => (
         <DraggableChip

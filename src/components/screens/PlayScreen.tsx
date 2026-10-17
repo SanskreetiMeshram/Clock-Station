@@ -53,7 +53,7 @@ interface QuestionPlayAreaProps {
 
 const QuestionPlayArea: React.FC<QuestionPlayAreaProps> = ({
   question,
-  questionIndex,
+  questionIndex: _questionIndex,
   levelId,
   accentColor,
   locomotiveStyle,
@@ -98,7 +98,7 @@ const QuestionPlayArea: React.FC<QuestionPlayAreaProps> = ({
     playChuff();
     const timer = setTimeout(() => {
       setTrainState('waiting');
-    }, 700);
+    }, 1600);
     return () => clearTimeout(timer);
   }, [playChuff]);
 
@@ -114,11 +114,12 @@ const QuestionPlayArea: React.FC<QuestionPlayAreaProps> = ({
     if (correct) {
       setSignalState('green');
       playWhistle();
-      // Realistic accelerating chuffs as train departs
+      // Realistic accelerating chuffs as train departs down the street
       playChuff();
       setTimeout(playChuff, 350);
       setTimeout(playChuff, 700);
-      setTimeout(playChuff, 1050);
+      setTimeout(playChuff, 1100);
+      setTimeout(playChuff, 1550);
       setTrainState('departing');
 
       const cheers = strings.mascot.correctCelebration;
@@ -128,7 +129,7 @@ const QuestionPlayArea: React.FC<QuestionPlayAreaProps> = ({
       setTimeout(() => {
         setIsEvaluating(false);
         onSuccess(attempts + 1, revealedSolution);
-      }, 1500);
+      }, 2200);
     } else {
       const newAttempts = attempts + 1;
       setAttempts(newAttempts);
@@ -200,10 +201,11 @@ const QuestionPlayArea: React.FC<QuestionPlayAreaProps> = ({
 
   return (
     <>
-      <main className="flex-1 min-h-0 w-full max-w-7xl mx-auto py-1 sm:py-2 flex flex-col justify-center">
-        <div className="h-full w-full grid grid-cols-1 md:grid-cols-12 gap-3 lg:gap-5 items-stretch min-h-0">
+      <main className="flex-1 min-h-0 w-full max-w-7xl mx-auto flex flex-col justify-between select-none">
+        {/* UPPER AREA: SIDE-BY-SIDE GAMEPLAY */}
+        <div className="flex-1 min-h-0 w-full grid grid-cols-1 md:grid-cols-12 gap-3 lg:gap-5 items-stretch py-1">
           {/* LEFT COLUMN: Interactive Clock Station */}
-          <div className="md:col-span-6 lg:col-span-5 h-full flex flex-col items-center justify-between p-3 sm:p-4 bg-white/75 backdrop-blur-sm rounded-3xl border-4 border-[#1B2A49] shadow-chunky min-h-0 overflow-hidden">
+          <div className="md:col-span-5 lg:col-span-5 h-full flex flex-col items-center justify-between p-2.5 sm:p-3.5 bg-white/80 backdrop-blur-sm rounded-3xl border-4 border-[#1B2A49] shadow-chunky min-h-0 overflow-hidden">
             {isTwinMode ? (
               <div className="flex flex-col sm:flex-row items-center gap-3 w-full justify-around flex-1 min-h-0">
                 <div className="flex-1 min-h-0 flex items-center justify-center">
@@ -216,7 +218,7 @@ const QuestionPlayArea: React.FC<QuestionPlayAreaProps> = ({
                     isDropTargetHovered={clockDropTargetHovered}
                     onChange={setClockTime}
                     onSnap={playTick}
-                    className="max-h-[min(340px,46vh)] aspect-square"
+                    className="max-h-[min(290px,36vh)] aspect-square"
                   />
                 </div>
                 <div className="flex flex-col items-center shrink-0">
@@ -242,14 +244,14 @@ const QuestionPlayArea: React.FC<QuestionPlayAreaProps> = ({
                   isDropTargetHovered={clockDropTargetHovered}
                   onChange={setClockTime}
                   onSnap={playTick}
-                  className="max-h-[min(360px,50vh)] aspect-square"
+                  className="max-h-[min(280px,33vh)] aspect-square"
                 />
               </div>
             )}
 
             {/* Quick-Advance Draggable Time Chips when setting clock */}
             {!isReadMode && (
-              <div className="w-full shrink-0 pt-2">
+              <div className="w-full shrink-0 pt-1">
                 <TimeChipsDrawer
                   onApplyDeltaMinutes={handleApplyDeltaMinutes}
                   onDragStateChange={(_isDragging, activeTarget) => {
@@ -261,8 +263,8 @@ const QuestionPlayArea: React.FC<QuestionPlayAreaProps> = ({
             )}
           </div>
 
-          {/* RIGHT COLUMN: Station Board, Tickets, Train Platform & Controls */}
-          <div className="md:col-span-6 lg:col-span-7 h-full flex flex-col justify-between gap-2.5 min-h-0">
+          {/* RIGHT COLUMN: Station Board, Tickets / Guidance, Mascot & Big Go Button */}
+          <div className="md:col-span-7 lg:col-span-7 h-full flex flex-col justify-between gap-2 min-h-0">
             {/* 1. Departure Board */}
             <div className="shrink-0">
               <DepartureBoard
@@ -274,7 +276,7 @@ const QuestionPlayArea: React.FC<QuestionPlayAreaProps> = ({
 
             {/* 2. Draggable Boarding Tickets in read_clock mode */}
             {isReadMode && question.choices && (
-              <div className="shrink-0">
+              <div className="flex-1 min-h-0 flex items-center">
                 <AnswerChoices
                   choices={question.choices}
                   selectedChoice={selectedChoice}
@@ -292,25 +294,22 @@ const QuestionPlayArea: React.FC<QuestionPlayAreaProps> = ({
               </div>
             )}
 
-            {/* 3. Train Platform on Track (Side-by-Side!) */}
-            <div className="flex-1 min-h-0 w-full flex items-center">
-              <TrainScene
-                trainState={trainState}
-                signalState={signalState}
-                locomotiveStyle={locomotiveStyle}
-                trainName={question.trainName}
-                isDragActive={isDraggingTicket}
-                isHoveredDropTarget={hoveredDropTarget === 'train-ticket-slot'}
-                className="w-full h-full max-h-[175px]"
-              />
-            </div>
+            {/* 2b. Encouragement Guide in Set Clock Mode */}
+            {!isReadMode && (
+              <div className="flex-1 min-h-0 flex items-center justify-center py-0.5">
+                <div className="bg-amber-100/90 border-2 border-amber-400/80 rounded-2xl px-4 py-2 text-center text-xs sm:text-sm font-bold text-[#1B2A49] flex items-center gap-2 shadow-sm">
+                  <span className="text-xl">👉</span>
+                  <span>Drag the clock hands to match the departure time, then press <strong>Go! 🚂</strong></span>
+                </div>
+              </div>
+            )}
 
-            {/* 4. Action Row: Conductor Mascot & Big Go Button */}
+            {/* 3. Action Row: Conductor Mascot & Big Go Button */}
             <div className="shrink-0 flex items-center justify-between gap-3">
               <div className="flex-1 min-w-0">
                 <Mascot
                   message={mascotMessage}
-                  showGhostHand={levelId === 1 && questionIndex === 0 && attempts === 0}
+                  showGhostHand={false}
                 />
               </div>
 
@@ -318,7 +317,7 @@ const QuestionPlayArea: React.FC<QuestionPlayAreaProps> = ({
                 type="button"
                 disabled={isEvaluating}
                 onClick={handleGo}
-                className="shrink-0 min-w-[190px] sm:min-w-[230px] min-h-[58px] sm:min-h-[64px] px-6 sm:px-8 py-3 rounded-3xl bg-[#3DDC84] hover:bg-[#34c776] text-[#1B2A49] text-2xl sm:text-3xl font-black border-4 border-[#1B2A49] shadow-chunky active:translate-y-1 active:shadow-chunky-active flex items-center justify-center gap-3 transition-transform focus-ring disabled:opacity-50"
+                className="shrink-0 min-w-[180px] sm:min-w-[215px] min-h-[54px] sm:min-h-[62px] px-6 sm:px-8 py-2.5 sm:py-3 rounded-3xl bg-[#3DDC84] hover:bg-[#34c776] text-[#1B2A49] text-2xl sm:text-3xl font-black border-4 border-[#1B2A49] shadow-chunky active:translate-y-1 active:shadow-chunky-active flex items-center justify-center gap-3 transition-transform focus-ring disabled:opacity-50"
                 aria-label="Send train"
               >
                 <Play className="w-7 h-7 sm:w-8 sm:h-8 fill-current" />
@@ -326,6 +325,19 @@ const QuestionPlayArea: React.FC<QuestionPlayAreaProps> = ({
               </button>
             </div>
           </div>
+        </div>
+
+        {/* LOWER AREA: FULL PANORAMIC TRAIN RUNNING SCENE ACROSS TOWN STREETS */}
+        <div className="shrink-0 w-full h-[150px] sm:h-[170px] lg:h-[190px] pt-1 pb-0.5">
+          <TrainScene
+            trainState={trainState}
+            signalState={signalState}
+            locomotiveStyle={locomotiveStyle}
+            trainName={question.trainName}
+            isDragActive={isDraggingTicket}
+            isHoveredDropTarget={hoveredDropTarget === 'train-ticket-slot'}
+            className="w-full h-full"
+          />
         </div>
       </main>
 

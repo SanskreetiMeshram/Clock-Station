@@ -114,6 +114,75 @@
   animation: pistonCrank 0.35s linear infinite;
 }
 
+/* Smooth Train Arrival from Offscreen Street Track */
+@keyframes trainArriveTrack {
+  0% {
+    transform: translateX(-1100px);
+  }
+  68% {
+    transform: translateX(18px);
+  }
+  84% {
+    transform: translateX(-6px);
+  }
+  100% {
+    transform: translateX(0px);
+  }
+}
+
+/* Realistic Train Departure Accelerating Down Town Street */
+@keyframes trainDepartTrack {
+  0% {
+    transform: translateX(0px);
+  }
+  10% {
+    transform: translateX(-14px);
+  }
+  28% {
+    transform: translateX(50px);
+  }
+  50% {
+    transform: translateX(260px);
+  }
+  75% {
+    transform: translateX(750px);
+  }
+  100% {
+    transform: translateX(1650px);
+  }
+}
+
+/* Gentle Hesitant Wobble on Tracks */
+@keyframes trainWobbleTrack {
+  0%, 100% {
+    transform: translateX(0px) rotate(0deg);
+  }
+  20% {
+    transform: translateX(-12px) rotate(-0.5deg);
+  }
+  40% {
+    transform: translateX(10px) rotate(0.4deg);
+  }
+  60% {
+    transform: translateX(-6px) rotate(-0.25deg);
+  }
+  80% {
+    transform: translateX(3px) rotate(0.1deg);
+  }
+}
+
+.anim-train-arrive {
+  animation: trainArriveTrack 1.6s cubic-bezier(0.12, 0.9, 0.25, 1) forwards;
+}
+
+.anim-train-depart {
+  animation: trainDepartTrack 2.2s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+
+.anim-train-wobble {
+  animation: trainWobbleTrack 0.5s ease-in-out;
+}
+
 .anim-train-idle {
   animation: trainIdleBob 2s ease-in-out infinite;
 }
