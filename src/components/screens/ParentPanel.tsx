@@ -8,6 +8,7 @@ export interface ParentPanelProps {
   levelsProgress: Record<number, LevelProgress>;
   mistakeHistory: MistakeRecord[];
   onResetProgress: () => void;
+  onUnlockAllLevels?: () => void;
   onClose: () => void;
 }
 
@@ -15,6 +16,7 @@ export const ParentPanel: React.FC<ParentPanelProps> = ({
   levelsProgress,
   mistakeHistory,
   onResetProgress,
+  onUnlockAllLevels,
   onClose,
 }) => {
   const [confirmReset, setConfirmReset] = useState(false);
@@ -141,40 +143,52 @@ export const ParentPanel: React.FC<ParentPanelProps> = ({
         </div>
 
         {/* Footer Actions */}
-        <div className="pt-4 border-t-2 border-slate-200 flex items-center justify-between">
-          {!confirmReset ? (
-            <button
-              type="button"
-              onClick={() => setConfirmReset(true)}
-              className="flex items-center gap-1.5 px-4 py-2.5 rounded-2xl bg-red-50 hover:bg-red-100 text-red-600 font-black text-sm border-2 border-red-300"
-            >
-              <RotateCcw className="w-4 h-4" />
-              <span>{strings.buttons.resetProgress}</span>
-            </button>
-          ) : (
-            <div className="flex items-center gap-2">
-              <span className="text-xs font-bold text-red-600 flex items-center gap-1">
-                <AlertTriangle className="w-4 h-4" /> Reset everything?
-              </span>
+        <div className="pt-4 border-t-2 border-slate-200 flex flex-wrap items-center justify-between gap-3">
+          <div className="flex items-center gap-2">
+            {!confirmReset ? (
               <button
                 type="button"
-                onClick={() => {
-                  onResetProgress();
-                  setConfirmReset(false);
-                }}
-                className="px-3 py-1.5 rounded-xl bg-red-600 text-white font-bold text-xs"
+                onClick={() => setConfirmReset(true)}
+                className="flex items-center gap-1.5 px-3 py-2 rounded-2xl bg-red-50 hover:bg-red-100 text-red-600 font-black text-xs sm:text-sm border-2 border-red-300"
               >
-                Yes, Reset
+                <RotateCcw className="w-4 h-4" />
+                <span>{strings.buttons.resetProgress}</span>
               </button>
+            ) : (
+              <div className="flex items-center gap-2">
+                <span className="text-xs font-bold text-red-600 flex items-center gap-1">
+                  <AlertTriangle className="w-4 h-4" /> Reset?
+                </span>
+                <button
+                  type="button"
+                  onClick={() => {
+                    onResetProgress();
+                    setConfirmReset(false);
+                  }}
+                  className="px-3 py-1.5 rounded-xl bg-red-600 text-white font-bold text-xs"
+                >
+                  Yes, Reset
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setConfirmReset(false)}
+                  className="px-3 py-1.5 rounded-xl bg-slate-200 text-slate-700 font-bold text-xs"
+                >
+                  Cancel
+                </button>
+              </div>
+            )}
+
+            {onUnlockAllLevels && (
               <button
                 type="button"
-                onClick={() => setConfirmReset(false)}
-                className="px-3 py-1.5 rounded-xl bg-slate-200 text-slate-700 font-bold text-xs"
+                onClick={onUnlockAllLevels}
+                className="flex items-center gap-1.5 px-3 py-2 rounded-2xl bg-amber-50 hover:bg-amber-100 text-amber-800 font-black text-xs sm:text-sm border-2 border-amber-300 shadow-sm"
               >
-                Cancel
+                <span>🔓 Unlock All Stations</span>
               </button>
-            </div>
-          )}
+            )}
+          </div>
 
           <button
             type="button"

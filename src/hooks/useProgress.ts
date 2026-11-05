@@ -7,15 +7,15 @@ const DEFAULT_STATE: UserProgressState = {
   currentLevel: 1,
   levels: {
     1: { levelId: 1, unlocked: true, completed: false, stars: 0, bestAccuracy: 0, attemptsCount: 0 },
-    2: { levelId: 2, unlocked: false, completed: false, stars: 0, bestAccuracy: 0, attemptsCount: 0 },
-    3: { levelId: 3, unlocked: false, completed: false, stars: 0, bestAccuracy: 0, attemptsCount: 0 },
-    4: { levelId: 4, unlocked: false, completed: false, stars: 0, bestAccuracy: 0, attemptsCount: 0 },
-    5: { levelId: 5, unlocked: false, completed: false, stars: 0, bestAccuracy: 0, attemptsCount: 0 },
-    6: { levelId: 6, unlocked: false, completed: false, stars: 0, bestAccuracy: 0, attemptsCount: 0 },
-    7: { levelId: 7, unlocked: false, completed: false, stars: 0, bestAccuracy: 0, attemptsCount: 0 },
-    8: { levelId: 8, unlocked: false, completed: false, stars: 0, bestAccuracy: 0, attemptsCount: 0 },
-    9: { levelId: 9, unlocked: false, completed: false, stars: 0, bestAccuracy: 0, attemptsCount: 0 },
-    10: { levelId: 10, unlocked: false, completed: false, stars: 0, bestAccuracy: 0, attemptsCount: 0 },
+    2: { levelId: 2, unlocked: true, completed: false, stars: 0, bestAccuracy: 0, attemptsCount: 0 },
+    3: { levelId: 3, unlocked: true, completed: false, stars: 0, bestAccuracy: 0, attemptsCount: 0 },
+    4: { levelId: 4, unlocked: true, completed: false, stars: 0, bestAccuracy: 0, attemptsCount: 0 },
+    5: { levelId: 5, unlocked: true, completed: false, stars: 0, bestAccuracy: 0, attemptsCount: 0 },
+    6: { levelId: 6, unlocked: true, completed: false, stars: 0, bestAccuracy: 0, attemptsCount: 0 },
+    7: { levelId: 7, unlocked: true, completed: false, stars: 0, bestAccuracy: 0, attemptsCount: 0 },
+    8: { levelId: 8, unlocked: true, completed: false, stars: 0, bestAccuracy: 0, attemptsCount: 0 },
+    9: { levelId: 9, unlocked: true, completed: false, stars: 0, bestAccuracy: 0, attemptsCount: 0 },
+    10: { levelId: 10, unlocked: true, completed: false, stars: 0, bestAccuracy: 0, attemptsCount: 0 },
   },
   mistakeHistory: [],
   soundMuted: false,
@@ -29,13 +29,23 @@ function loadStoredState(): UserProgressState {
     const raw = localStorage.getItem(STORAGE_KEY);
     if (!raw) return DEFAULT_STATE;
     const parsed = JSON.parse(raw);
+    const loadedLevels = {
+      ...DEFAULT_STATE.levels,
+      ...(parsed.levels || {}),
+    };
+    // Ensure all 10 levels are unlocked
+    for (let i = 1; i <= 10; i++) {
+      if (loadedLevels[i]) {
+        loadedLevels[i] = {
+          ...loadedLevels[i],
+          unlocked: true,
+        };
+      }
+    }
     return {
       ...DEFAULT_STATE,
       ...parsed,
-      levels: {
-        ...DEFAULT_STATE.levels,
-        ...(parsed.levels || {}),
-      },
+      levels: loadedLevels,
     };
   } catch {
     return DEFAULT_STATE;
@@ -139,14 +149,34 @@ export function useProgress() {
     setState((prev) => ({ ...prev, currentLevel: lvl }));
   }, []);
 
+  const unlockAllLevels = useCallback(() => {
+    setState((prev) => {
+      const allUnlocked: Record<number, any> = {};
+      for (let i = 1; i <= 10; i++) {
+        allUnlocked[i] = {
+          ...(prev.levels[i] || {
+            levelId: i,
+            completed: false,
+            stars: 0,
+            bestAccuracy: 0,
+            attemptsCount: 0,
+          }),
+          unlocked: true,
+        };
+      }
+      return { ...prev, levels: allUnlocked };
+    });
+  }, []);
+
   return {
     state,
     completeLevel,
     recordMistake,
     resetProgress,
+    unlockAllLevels,
     setSoundMuted,
     toggleLargeText,
     toggleDigitalBubble,
     setCurrentLevel,
   };
-}
+};

@@ -16,6 +16,7 @@ export function App() {
     completeLevel,
     recordMistake,
     resetProgress,
+    unlockAllLevels,
     setSoundMuted,
     toggleLargeText,
     setCurrentLevel,
@@ -149,6 +150,7 @@ export function App() {
             resetProgress();
             setActiveLevelId(1);
           }}
+          onUnlockAllLevels={unlockAllLevels}
           onClose={() => setShowParentPanel(false)}
         />
       )}

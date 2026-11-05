@@ -40,11 +40,11 @@ export const LevelMapScreen: React.FC<LevelMapScreenProps> = ({
           {Object.values(LEVEL_CONFIGS).map((config) => {
             const progress = levelsProgress[config.id] || {
               levelId: config.id,
-              unlocked: config.id === 1,
+              unlocked: true,
               completed: false,
               stars: 0,
             };
-            const isUnlocked = progress.unlocked;
+            const isUnlocked = progress.unlocked ?? true;
             const stars = progress.stars || 0;
 
             return (
