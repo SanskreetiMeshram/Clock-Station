@@ -104,10 +104,24 @@ export const LevelMapScreen: React.FC<LevelMapScreenProps> = ({
                   </p>
                 </div>
 
-                {/* Skill Badge */}
+                {/* Skill & Difficulty Badge */}
                 <div className="mt-4 pt-3 border-t-2 border-slate-100 flex items-center justify-between text-xs font-bold text-slate-500">
                   <span>{config.questionCount} Trains</span>
-                  <span className="capitalize">{config.mode} mode</span>
+                  <span
+                    className={`uppercase text-[11px] font-black px-2.5 py-0.5 rounded-full border ${
+                      config.difficulty === 'master'
+                        ? 'bg-rose-100 text-rose-800 border-rose-400'
+                        : config.difficulty === 'expert'
+                        ? 'bg-orange-100 text-orange-800 border-orange-400'
+                        : config.difficulty === 'hard'
+                        ? 'bg-purple-100 text-purple-800 border-purple-400'
+                        : config.difficulty === 'medium'
+                        ? 'bg-sky-100 text-sky-800 border-sky-300'
+                        : 'bg-emerald-100 text-emerald-800 border-emerald-300'
+                    }`}
+                  >
+                    {config.difficulty || config.mode}
+                  </span>
                 </div>
               </button>
             );

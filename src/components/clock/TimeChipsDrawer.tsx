@@ -9,16 +9,24 @@ export interface TimeChip {
   icon: string;
 }
 
-const TIME_CHIPS: TimeChip[] = [
+const FORWARD_CHIPS: TimeChip[] = [
   { id: 'plus-5', label: '+5 min', minutes: 5, color: '#3DDC84', icon: '⚡' },
   { id: 'plus-15', label: '+15 min', minutes: 15, color: '#3A86FF', icon: '🕒' },
   { id: 'plus-30', label: '+30 min', minutes: 30, color: '#FF9F1C', icon: '⏳' },
   { id: 'plus-60', label: '+1 hour', minutes: 60, color: '#8338EC', icon: '🚂' },
 ];
 
+const BACKWARD_CHIPS: TimeChip[] = [
+  { id: 'minus-5', label: '-5 min', minutes: -5, color: '#3DDC84', icon: '⏪' },
+  { id: 'minus-15', label: '-15 min', minutes: -15, color: '#3A86FF', icon: '🕒' },
+  { id: 'minus-30', label: '-30 min', minutes: -30, color: '#FF9F1C', icon: '⏳' },
+  { id: 'minus-60', label: '-1 hour', minutes: -60, color: '#8338EC', icon: '🚂' },
+];
+
 export interface TimeChipsDrawerProps {
   onApplyDeltaMinutes: (minutes: number) => void;
   onDragStateChange?: (isDragging: boolean, activeTarget: string | null) => void;
+  direction?: 'forward' | 'backward';
   disabled?: boolean;
   className?: string;
 }
@@ -41,12 +49,8 @@ const DraggableChip: React.FC<DraggableChipProps> = ({
       data: chip,
       disabled,
       onClickFallback: () => onApplyDeltaMinutes(chip.minutes),
-      onDrop: (targetId, data) => {
-        if (targetId === 'analog-clock-face') {
-          onApplyDeltaMinutes(data.minutes);
-        } else {
-          onApplyDeltaMinutes(data.minutes);
-        }
+      onDrop: (_targetId, data) => {
+        onApplyDeltaMinutes(data.minutes);
       },
     });
 
@@ -101,9 +105,12 @@ const DraggableChip: React.FC<DraggableChipProps> = ({
 export const TimeChipsDrawer: React.FC<TimeChipsDrawerProps> = ({
   onApplyDeltaMinutes,
   onDragStateChange,
+  direction = 'forward',
   disabled = false,
   className = '',
 }) => {
+  const chips = direction === 'backward' ? BACKWARD_CHIPS : FORWARD_CHIPS;
+
   return (
     <div
       className={`flex flex-wrap items-center justify-center gap-1.5 p-1.5 rounded-2xl bg-white/90 border-2 border-[#1B2A49] shadow-sm ${className}`}
@@ -111,9 +118,9 @@ export const TimeChipsDrawer: React.FC<TimeChipsDrawerProps> = ({
       aria-label="Quick time advance tokens"
     >
       <span className="text-[11px] font-black text-[#64748B] uppercase tracking-wide mr-0.5">
-        Jump:
+        {direction === 'backward' ? 'Back:' : 'Jump:'}
       </span>
-      {TIME_CHIPS.map((chip) => (
+      {chips.map((chip) => (
         <DraggableChip
           key={chip.id}
           chip={chip}

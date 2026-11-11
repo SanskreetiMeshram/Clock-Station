@@ -8,6 +8,7 @@ export interface DepartureBoardProps {
   question: Question;
   onReadAloud?: () => void;
   isSpeaking?: boolean;
+  showHandLegend?: boolean;
   className?: string;
 }
 
@@ -15,11 +16,15 @@ export const DepartureBoard: React.FC<DepartureBoardProps> = ({
   question,
   onReadAloud,
   isSpeaking = false,
+  showHandLegend = true,
   className = '',
 }) => {
   const [showTimeline, setShowTimeline] = useState(false);
 
-  const isJourney = question.type === 'journey_elapsed';
+  const isJourney =
+    question.type === 'journey_elapsed' &&
+    Boolean(question.durationMinutes) &&
+    Boolean(question.departureTime || question.arrivalTime);
 
   return (
     <div
@@ -59,38 +64,43 @@ export const DepartureBoard: React.FC<DepartureBoardProps> = ({
       </div>
 
       {/* Main Task Prompt */}
-      <div className="my-auto py-2">
-        <h2 className="text-2xl sm:text-3xl font-extrabold text-[#FFD23F] tracking-wide leading-tight drop-shadow-sm font-display">
+      <div className="my-auto py-1">
+        <h2 className="text-xl sm:text-2xl lg:text-3xl font-extrabold text-[#FFD23F] tracking-wide leading-tight drop-shadow-sm font-display">
           {question.promptText}
         </h2>
 
-        {/* Color-coded reminder labels for young learners */}
-        <div className="flex items-center gap-3 mt-2 text-xs font-bold">
-          <span className="flex items-center gap-1 text-[#93C5FD]">
-            <span className="w-2.5 h-2.5 rounded-full bg-[#3A86FF] inline-block" />
-            Short Blue Hand = Hour
-          </span>
-          <span className="flex items-center gap-1 text-[#FECDD3]">
-            <span className="w-2.5 h-2.5 rounded-full bg-[#FF5A5F] inline-block" />
-            Long Red Hand = Minute
-          </span>
-        </div>
+        {/* Color-coded reminder labels only on starter/medium stations */}
+        {showHandLegend && (
+          <div className="flex items-center gap-3 mt-2 text-xs font-bold">
+            <span className="flex items-center gap-1 text-[#93C5FD]">
+              <span className="w-2.5 h-2.5 rounded-full bg-[#3A86FF] inline-block" />
+              Short Blue Hand = Hour
+            </span>
+            <span className="flex items-center gap-1 text-[#FECDD3]">
+              <span className="w-2.5 h-2.5 rounded-full bg-[#FF5A5F] inline-block" />
+              Long Red Hand = Minute
+            </span>
+          </div>
+        )}
       </div>
 
-      {/* Journey Visualization for Levels 7 & 8 */}
-      {isJourney && question.departureTime && question.durationMinutes && (
-        <div className="mt-3 flex flex-col gap-2">
+      {/* Journey Visualization for Levels 7, 8 & 10 */}
+      {isJourney && question.durationMinutes && (
+        <div className="mt-2 flex flex-col gap-1.5">
           <JourneyRibbon
             departure={question.departureTime}
+            arrival={question.arrivalTime}
             durationMinutes={question.durationMinutes}
+            direction={question.direction}
+            legBreakdownText={question.legBreakdownText}
           />
 
-          {/* Toggleable Animated Number Line Helper */}
+          {/* Toggleable Number Line Helper (without answer spoiler) */}
           <div className="flex items-center justify-between">
             <button
               type="button"
               onClick={() => setShowTimeline((prev) => !prev)}
-              className="text-xs font-bold text-amber-300 hover:text-amber-200 underline decoration-dotted flex items-center gap-1 py-1"
+              className="text-xs font-bold text-amber-300 hover:text-amber-200 underline decoration-dotted flex items-center gap-1 py-0.5"
             >
               <span>{showTimeline ? '▲ Hide Timeline' : '▼ Show me the timeline jump'}</span>
             </button>
@@ -99,7 +109,10 @@ export const DepartureBoard: React.FC<DepartureBoardProps> = ({
           {showTimeline && (
             <TimelineJump
               departure={question.departureTime}
+              arrival={question.arrivalTime}
               durationMinutes={question.durationMinutes}
+              direction={question.direction}
+              legBreakdownText={question.legBreakdownText}
             />
           )}
         </div>

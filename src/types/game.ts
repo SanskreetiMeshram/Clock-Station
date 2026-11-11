@@ -6,6 +6,10 @@ export type ClockTime = {
 
 export type ClockMode = 'simple' | 'full';
 
+export type DialStyle = 'full' | 'quarters' | 'ticks_only';
+
+export type DifficultyTier = 'starter' | 'medium' | 'hard' | 'expert' | 'master';
+
 export type QuestionType =
   | 'set_clock'
   | 'read_clock'
@@ -19,12 +23,20 @@ export interface Question {
   trainName: string;
   targetTime: ClockTime;
   initialTime?: ClockTime; // Starting position of clock hands
-  departureTime?: ClockTime; // For journey questions
+  departureTime?: ClockTime; // For forward journey questions
+  arrivalTime?: ClockTime; // For backward journey questions
   durationMinutes?: number; // For journey questions
+  direction?: 'forward' | 'backward';
+  legBreakdownText?: string; // Multi-step delay/run breakdown
+  referenceTime?: ClockTime; // Reference digital board time in twin_match / twin_duration
+  reference24h?: boolean; // Render twin board in 24-hour format
+  boardLabel?: string; // Label above twin board
+  allowVisualHints?: boolean; // Disable cheat overlays in harder stations
   promptText: string;
   readAloudText: string;
   choices?: ClockTime[]; // For read_clock or multiple choice
   clockMode: ClockMode;
+  dialStyle?: DialStyle;
   snapStep: 1 | 5 | 15;
 }
 
@@ -55,6 +67,8 @@ export interface LevelConfig {
   locomotiveStyle: LocomotiveStyle;
   snapStep: 1 | 5 | 15;
   mode: ClockMode;
+  dialStyle?: DialStyle;
+  difficulty?: DifficultyTier;
   questionCount: number;
   questionType: QuestionType;
 }

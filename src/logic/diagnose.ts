@@ -106,11 +106,16 @@ export function diagnoseMistake(
     };
   }
 
-  // 8. Elapsed time error for levels 7 and 8:
-  if (levelId === 7 || levelId === 8) {
+  // 8. Elapsed time / calculation error for levels 7 to 10:
+  if (levelId >= 7) {
     return {
       category: 'elapsed_calculation_error',
-      message: levelId === 7 ? strings.hints.elapsedWhole : strings.hints.elapsedMinutes,
+      message:
+        levelId === 7
+          ? strings.hints.elapsedWhole
+          : levelId === 8
+          ? strings.hints.elapsedMinutes
+          : strings.hints.hardCalculation,
       highlightHand: 'both',
     };
   }

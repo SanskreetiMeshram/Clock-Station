@@ -48,8 +48,9 @@ export const strings = {
     halfPast: "Half past means the long minute hand points straight down at 6 (30 minutes)!",
     quarterPast: "Quarter past means the long hand points at 3 (15 minutes).",
     quarterTo: "Quarter to means the long hand points at 9 (45 minutes).",
-    elapsedWhole: "Add the journey hours to the departure hour!",
-    elapsedMinutes: "Count the minutes from departure to arrival!",
+    elapsedWhole: "Add or subtract the journey hours carefully—watch out when crossing 12!",
+    elapsedMinutes: "Count every minute across delays and hour crossings!",
+    hardCalculation: "Double-check your 24-hour conversion, offset math, and minute tick marks!",
   },
 
   levels: {
@@ -75,33 +76,33 @@ export const strings = {
     },
     5: {
       name: "Every-Minute Central",
-      skill: "Precise minutes 1–59",
-      description: "Set the clock to the exact minute.",
+      skill: "Exact minutes & 'before' clues",
+      description: "Read tricky 'before/past' clues and set the exact minute without a digital bubble.",
     },
     6: {
       name: "Read the Clock",
-      skill: "Read analogue & pick digital",
-      description: "Look at the clock face and choose the matching digital time.",
+      skill: "Single-minute reading & close traps",
+      description: "Read the exact minute hand and spot hour-creep look-alike traps.",
     },
     7: {
       name: "Journey Time I",
-      skill: "Elapsed time (hours)",
-      description: "Calculate the arrival time after 1 or 2 hours of travel.",
+      skill: "Compound hours & reverse trips",
+      description: "Solve multi-hour + minute arrivals and work backward to find departure times.",
     },
     8: {
       name: "Journey Time II",
-      skill: "Elapsed time (crossing hours)",
-      description: "Calculate the arrival time with minute journeys.",
+      skill: "2-step delays & quarter dial",
+      description: "Combine signal delays and exact-minute runs on a 12-3-6-9 station clock.",
     },
     9: {
       name: "Twin Clocks",
-      skill: "Matching & duration",
-      description: "Match analogue and digital clocks side by side.",
+      skill: "24-hour boards & offset clocks",
+      description: "Convert 24-hour timetables and solve fast/slow clock offsets.",
     },
     10: {
       name: "Station Master",
-      skill: "Grand Master Challenge",
-      description: "The ultimate station challenge with all clock skills!",
+      skill: "No-Numbers Master Finale",
+      description: "Master all hard challenges on a numbers-free station dial!",
     },
   },
 

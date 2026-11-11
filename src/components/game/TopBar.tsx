@@ -2,9 +2,12 @@ import React from 'react';
 import { Volume2, VolumeX, Type, Pause, Star } from 'lucide-react';
 import { ProgressCarriages } from './ProgressCarriages';
 
+import type { DifficultyTier } from '../../types/game';
+
 export interface TopBarProps {
   levelId: number;
   levelName: string;
+  difficulty?: DifficultyTier;
   totalQuestions: number;
   currentQuestionIndex: number;
   starsPerQuestion: number[];
@@ -16,9 +19,18 @@ export interface TopBarProps {
   className?: string;
 }
 
+const DIFFICULTY_BADGE_COLORS: Record<DifficultyTier, string> = {
+  starter: 'bg-emerald-100 text-emerald-800 border-emerald-400',
+  medium: 'bg-sky-100 text-sky-800 border-sky-400',
+  hard: 'bg-purple-100 text-purple-800 border-purple-500',
+  expert: 'bg-orange-100 text-orange-800 border-orange-500',
+  master: 'bg-rose-100 text-rose-800 border-rose-500',
+};
+
 export const TopBar: React.FC<TopBarProps> = ({
   levelId,
   levelName,
+  difficulty,
   totalQuestions,
   currentQuestionIndex,
   starsPerQuestion,
@@ -46,9 +58,18 @@ export const TopBar: React.FC<TopBarProps> = ({
         </button>
 
         <div>
-          <span className="text-[11px] font-black uppercase text-[#3A86FF] tracking-wider block">
-            Station {levelId}
-          </span>
+          <div className="flex items-center gap-1.5">
+            <span className="text-[11px] font-black uppercase text-[#3A86FF] tracking-wider">
+              Station {levelId}
+            </span>
+            {difficulty && (
+              <span
+                className={`text-[10px] font-black uppercase px-1.5 py-0.5 rounded-full border ${DIFFICULTY_BADGE_COLORS[difficulty]}`}
+              >
+                {difficulty}
+              </span>
+            )}
+          </div>
           <h1 className="text-base sm:text-lg font-black text-[#1B2A49] leading-tight">
             {levelName}
           </h1>

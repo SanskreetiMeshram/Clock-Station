@@ -1,5 +1,5 @@
 import React, { useRef, useId } from 'react';
-import type { ClockTime, ClockMode } from '../../types/game';
+import type { ClockTime, ClockMode, DialStyle } from '../../types/game';
 import { hourAngle, minuteAngle, formatDigital } from '../../logic/clockMath';
 import { useDraggableHand } from '../../hooks/useDraggableHand';
 
@@ -7,6 +7,7 @@ export interface AnalogClockProps {
   time: ClockTime;
   interactive?: boolean;
   mode?: ClockMode;
+  dialStyle?: DialStyle;
   snapStep?: 1 | 5 | 15;
   showDigitalBubble?: boolean;
   highlight?: 'hour' | 'minute' | 'both';
@@ -40,6 +41,7 @@ export const AnalogClock: React.FC<AnalogClockProps> = ({
   time,
   interactive = true,
   mode = 'full',
+  dialStyle = 'full',
   snapStep = 1,
   showDigitalBubble = false,
   highlight,
@@ -96,9 +98,15 @@ export const AnalogClock: React.FC<AnalogClockProps> = ({
   // Generate 60 minute ticks
   const ticks = Array.from({ length: 60 }, (_, i) => {
     const isFiveMin = i % 5 === 0;
+    const isQuarter = i % 15 === 0;
     const angle = i * 6;
     const rad = (angle * Math.PI) / 180;
-    const innerR = isFiveMin ? 152 : 160;
+    const innerR =
+      dialStyle === 'ticks_only' && isQuarter
+        ? 144
+        : isFiveMin
+        ? 152
+        : 160;
     const outerR = 172;
     const x1 = 200 + innerR * Math.sin(rad);
     const y1 = 200 - innerR * Math.cos(rad);
@@ -106,13 +114,14 @@ export const AnalogClock: React.FC<AnalogClockProps> = ({
     const y2 = 200 - outerR * Math.cos(rad);
     const colorIndex = Math.floor(i / 5) % 12;
     const color = isFiveMin ? RAINBOW_COLORS[colorIndex] : '#CBD5E1';
-    const strokeWidth = isFiveMin ? 4 : 2;
+    const strokeWidth =
+      dialStyle === 'ticks_only' && isQuarter ? 6 : isFiveMin ? 4 : 2;
 
     return { i, x1, y1, x2, y2, color, strokeWidth, isFiveMin };
   });
 
-  // Numerals 1..12
-  const numerals = Array.from({ length: 12 }, (_, i) => {
+  // Numerals 1..12 filtered by dialStyle
+  const allNumerals = Array.from({ length: 12 }, (_, i) => {
     const num = i + 1;
     const angle = num * 30;
     const rad = (angle * Math.PI) / 180;
@@ -122,6 +131,13 @@ export const AnalogClock: React.FC<AnalogClockProps> = ({
     const color = RAINBOW_COLORS[num % 12];
     return { num, x, y, color, angle };
   });
+
+  const numerals =
+    dialStyle === 'ticks_only'
+      ? []
+      : dialStyle === 'quarters'
+      ? allNumerals.filter((n) => n.num % 3 === 0)
+      : allNumerals;
 
   return (
     <div
@@ -269,7 +285,18 @@ export const AnalogClock: React.FC<AnalogClockProps> = ({
           />
         ))}
 
-        {/* Clock Numerals (1 to 12) */}
+        {/* Top 12-o'clock orientation marker for numbers-free Station Master dial */}
+        {dialStyle === 'ticks_only' && (
+          <polygon
+            points="200,140 192,126 208,126"
+            fill="#F59E0B"
+            stroke="#1B2A49"
+            strokeWidth="2.5"
+            className="pointer-events-none select-none"
+          />
+        )}
+
+        {/* Clock Numerals (1 to 12, filtered by dialStyle) */}
         {numerals.map((num) => (
           <g key={num.num}>
             <text

@@ -3,7 +3,7 @@ import { Play } from 'lucide-react';
 import type { Question, ClockTime, MistakeDiagnostic } from '../../types/game';
 import { LEVEL_CONFIGS } from '../../logic/levels';
 import { generateQuestionsForLevel } from '../../logic/questionGenerator';
-import { isCorrect } from '../../logic/clockMath';
+import { isCorrect, addMinutes } from '../../logic/clockMath';
 import { diagnoseMistake } from '../../logic/diagnose';
 import { calculateQuestionStars, calculateLevelStars } from '../../logic/scoring';
 import { strings } from '../../strings/strings.en';
@@ -180,12 +180,7 @@ const QuestionPlayArea: React.FC<QuestionPlayAreaProps> = ({
 
   const handleApplyDeltaMinutes = (deltaMin: number) => {
     playTick();
-    setClockTime((prev) => {
-      const totalMinutes = prev.h * 60 + prev.m + deltaMin;
-      const newH = Math.floor(totalMinutes / 60) % 12 || 12;
-      const newM = totalMinutes % 60;
-      return { h: newH, m: newM };
-    });
+    setClockTime((prev) => addMinutes(prev, deltaMin));
   };
 
   const handleDismissHint = () => {
@@ -196,8 +191,11 @@ const QuestionPlayArea: React.FC<QuestionPlayAreaProps> = ({
   };
 
   const isReadMode = question.type === 'read_clock';
-  const isTwinMode = question.type === 'twin_match';
-  const showBubble = showDigitalBubble && levelId < 6;
+  const isTwinMode =
+    question.type === 'twin_match' || question.type === 'twin_duration';
+  const showBubble = showDigitalBubble && levelId < 5;
+  const allowVisualHints = question.allowVisualHints ?? levelId < 7;
+  const dialStyle = question.dialStyle || 'full';
 
   return (
     <>
@@ -213,7 +211,10 @@ const QuestionPlayArea: React.FC<QuestionPlayAreaProps> = ({
                     time={clockTime}
                     interactive={true}
                     mode={question.clockMode}
+                    dialStyle={dialStyle}
                     snapStep={question.snapStep}
+                    highlight={diagnostic?.highlightHand}
+                    showMultiplierHint={allowVisualHints ? diagnostic?.showMultiplierHint : false}
                     accentColor={accentColor}
                     isDropTargetHovered={clockDropTargetHovered}
                     onChange={setClockTime}
@@ -223,9 +224,13 @@ const QuestionPlayArea: React.FC<QuestionPlayAreaProps> = ({
                 </div>
                 <div className="flex flex-col items-center shrink-0">
                   <span className="text-xs font-black text-[#1B2A49] mb-1 uppercase tracking-wider">
-                    Target Board
+                    {question.boardLabel || 'Target Board'}
                   </span>
-                  <DigitalClock time={question.targetTime} size="md" />
+                  <DigitalClock
+                    time={question.referenceTime || question.targetTime}
+                    mode={question.reference24h ? '24h' : '12h'}
+                    size="md"
+                  />
                 </div>
               </div>
             ) : (
@@ -234,13 +239,14 @@ const QuestionPlayArea: React.FC<QuestionPlayAreaProps> = ({
                   time={clockTime}
                   interactive={!isReadMode}
                   mode={question.clockMode}
+                  dialStyle={dialStyle}
                   snapStep={question.snapStep}
                   accentColor={accentColor}
                   showDigitalBubble={showBubble}
                   highlight={diagnostic?.highlightHand}
-                  showMultiplierHint={diagnostic?.showMultiplierHint}
-                  showHalfSlice={diagnostic?.showHalfSlice}
-                  showQuarterSlice={diagnostic?.showQuarterSlice}
+                  showMultiplierHint={allowVisualHints ? diagnostic?.showMultiplierHint : false}
+                  showHalfSlice={allowVisualHints ? diagnostic?.showHalfSlice : false}
+                  showQuarterSlice={allowVisualHints ? diagnostic?.showQuarterSlice : false}
                   isDropTargetHovered={clockDropTargetHovered}
                   onChange={setClockTime}
                   onSnap={playTick}
@@ -254,6 +260,7 @@ const QuestionPlayArea: React.FC<QuestionPlayAreaProps> = ({
               <div className="w-full shrink-0 pt-1">
                 <TimeChipsDrawer
                   onApplyDeltaMinutes={handleApplyDeltaMinutes}
+                  direction={question.direction}
                   onDragStateChange={(_isDragging, activeTarget) => {
                     setClockDropTargetHovered(activeTarget === 'analog-clock-face');
                   }}
@@ -271,6 +278,7 @@ const QuestionPlayArea: React.FC<QuestionPlayAreaProps> = ({
                 question={question}
                 onReadAloud={handleReadAloud}
                 isSpeaking={isSpeaking}
+                showHandLegend={levelId < 5}
               />
             </div>
 
@@ -299,7 +307,16 @@ const QuestionPlayArea: React.FC<QuestionPlayAreaProps> = ({
               <div className="flex-1 min-h-0 flex items-center justify-center py-0.5">
                 <div className="bg-amber-100/90 border-2 border-amber-400/80 rounded-2xl px-4 py-2 text-center text-xs sm:text-sm font-bold text-[#1B2A49] flex items-center gap-2 shadow-sm">
                   <span className="text-xl">👉</span>
-                  <span>Drag the clock hands to match the departure time, then press <strong>Go! 🚂</strong></span>
+                  <span>
+                    {question.type === 'journey_elapsed'
+                      ? question.direction === 'backward'
+                        ? 'Work backward on the clock to set when the train left, then press '
+                        : 'Calculate the arrival time and set the clock hands, then press '
+                      : isTwinMode
+                      ? 'Solve the board clue on the analog clock, then press '
+                      : 'Drag the clock hands to match the departure time, then press '}
+                    <strong>Go! 🚂</strong>
+                  </span>
                 </div>
               </div>
             )}
@@ -404,6 +421,7 @@ export const PlayScreen: React.FC<PlayScreenProps> = ({
       <TopBar
         levelId={levelId}
         levelName={config.name}
+        difficulty={config.difficulty}
         totalQuestions={questions.length}
         currentQuestionIndex={questionIndex}
         starsPerQuestion={starsPerQuestion}

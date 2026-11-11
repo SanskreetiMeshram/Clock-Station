@@ -1,6 +1,8 @@
 import { describe, it, expect, vi } from 'vitest';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { AnalogClock } from '../../components/clock/AnalogClock';
+import { DigitalClock } from '../../components/clock/DigitalClock';
+import { TimelineJump } from '../../components/board/TimelineJump';
 
 describe('AnalogClock component', () => {
   it('renders accessible hour and minute sliders', () => {
@@ -13,6 +15,37 @@ describe('AnalogClock component', () => {
     expect(minuteHand).toBeInTheDocument();
     expect(hourHand).toHaveAttribute('aria-valuenow', '4');
     expect(minuteHand).toHaveAttribute('aria-valuenow', '30');
+  });
+
+  it('renders only quarter numerals in quarters dialStyle and no numerals in ticks_only dialStyle', () => {
+    const { container: quartersContainer } = render(
+      <AnalogClock time={{ h: 4, m: 30 }} dialStyle="quarters" />
+    );
+    const quarterTexts = Array.from(quartersContainer.querySelectorAll('text')).map(
+      (n) => n.textContent
+    );
+    expect(quarterTexts).toEqual(['3', '6', '9', '12']);
+
+    const { container: ticksContainer } = render(
+      <AnalogClock time={{ h: 4, m: 30 }} dialStyle="ticks_only" />
+    );
+    expect(ticksContainer.querySelectorAll('text').length).toBe(0);
+  });
+
+  it('renders 24-hour timetable formatting on DigitalClock and hides answers on TimelineJump', () => {
+    render(<DigitalClock time={{ h: 7, m: 43, period: 'PM' }} mode="24h" />);
+    expect(screen.getByRole('timer')).toHaveAttribute('aria-label', 'Digital time: 19:43');
+
+    render(
+      <TimelineJump
+        departure={{ h: 10, m: 45 }}
+        durationMinutes={105}
+        direction="forward"
+      />
+    );
+    expect(screen.getByText('10:45')).toBeInTheDocument();
+    expect(screen.getByText('??:??')).toBeInTheDocument();
+    expect(screen.queryByText('12:30')).not.toBeInTheDocument();
   });
 
   it('updates time via keyboard arrow keys', () => {
