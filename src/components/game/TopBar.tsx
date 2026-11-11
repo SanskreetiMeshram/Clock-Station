@@ -1,5 +1,5 @@
 import React from 'react';
-import { Volume2, VolumeX, Type, Pause, Star } from 'lucide-react';
+import { Volume2, VolumeX, Type, Pause, Star, Mic } from 'lucide-react';
 import { ProgressCarriages } from './ProgressCarriages';
 
 import type { DifficultyTier } from '../../types/game';
@@ -16,6 +16,8 @@ export interface TopBarProps {
   onToggleMute: () => void;
   onToggleTextSize: () => void;
   onPause: () => void;
+  onOpenVoiceSettings?: () => void;
+  isElevenLabsConfigured?: boolean;
   className?: string;
 }
 
@@ -39,6 +41,8 @@ export const TopBar: React.FC<TopBarProps> = ({
   onToggleMute,
   onToggleTextSize,
   onPause,
+  onOpenVoiceSettings,
+  isElevenLabsConfigured = false,
   className = '',
 }) => {
   return (
@@ -103,6 +107,33 @@ export const TopBar: React.FC<TopBarProps> = ({
         >
           <Type className="w-5 h-5" />
         </button>
+
+        {/* Voice settings toggle */}
+        {onOpenVoiceSettings && (
+          <button
+            type="button"
+            onClick={onOpenVoiceSettings}
+            className={`flex items-center justify-center gap-1 px-2.5 h-10 rounded-2xl border-2 border-[#1B2A49] font-bold shadow-chunky-sm active:translate-y-0.5 transition-colors ${
+              isElevenLabsConfigured
+                ? 'bg-violet-100 hover:bg-violet-200 text-violet-900'
+                : 'bg-amber-50 hover:bg-amber-100 text-[#1B2A49]'
+            }`}
+            title={
+              isElevenLabsConfigured
+                ? 'ElevenLabs Realistic Voice active — click to customize'
+                : 'Set up ElevenLabs Realistic Voice'
+            }
+            aria-label="Open voice settings"
+          >
+            <Mic className="w-4 h-4" />
+            <span className="hidden md:inline text-xs font-black">Voice</span>
+            <span
+              className={`w-2 h-2 rounded-full ${
+                isElevenLabsConfigured ? 'bg-emerald-500' : 'bg-amber-400'
+              }`}
+            />
+          </button>
+        )}
 
         {/* Sound toggle */}
         <button

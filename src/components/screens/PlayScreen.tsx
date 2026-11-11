@@ -18,6 +18,7 @@ import { AnswerChoices } from '../game/AnswerChoices';
 import { TimeChipsDrawer } from '../clock/TimeChipsDrawer';
 import { HintOverlay } from '../game/HintOverlay';
 import { Confetti } from '../game/Confetti';
+import { VoiceSettingsModal } from '../game/VoiceSettingsModal';
 import { useSpeech } from '../../hooks/useSpeech';
 
 export interface PlayScreenProps {
@@ -43,6 +44,11 @@ interface QuestionPlayAreaProps {
   accentColor: string;
   locomotiveStyle: any;
   showDigitalBubble: boolean;
+  isMuted: boolean;
+  speak: (rawText: string, speakOpts?: { force?: boolean }) => Promise<void>;
+  isSpeaking: boolean;
+  isElevenLabsConfigured: boolean;
+  autoReadVoice: boolean;
   playTick: () => void;
   playWhistle: () => void;
   playChuff: () => void;
@@ -58,6 +64,11 @@ const QuestionPlayArea: React.FC<QuestionPlayAreaProps> = ({
   accentColor,
   locomotiveStyle,
   showDigitalBubble,
+  isMuted,
+  speak,
+  isSpeaking,
+  isElevenLabsConfigured,
+  autoReadVoice,
   playTick,
   playWhistle,
   playChuff,
@@ -91,8 +102,6 @@ const QuestionPlayArea: React.FC<QuestionPlayAreaProps> = ({
   const [hoveredDropTarget, setHoveredDropTarget] = useState<string | null>(null);
   const [clockDropTargetHovered, setClockDropTargetHovered] = useState(false);
 
-  const { speak, isSpeaking } = useSpeech();
-
   // Arrival animation and sound on question mount
   useEffect(() => {
     playChuff();
@@ -102,8 +111,26 @@ const QuestionPlayArea: React.FC<QuestionPlayAreaProps> = ({
     return () => clearTimeout(timer);
   }, [playChuff]);
 
+  // Auto-read prompt with realistic voice when ElevenLabs & autoRead are active
+  useEffect(() => {
+    if (!isMuted && isElevenLabsConfigured && autoReadVoice) {
+      const readTimer = setTimeout(() => {
+        void speak(question.readAloudText || question.promptText);
+      }, 350);
+      return () => clearTimeout(readTimer);
+    }
+  }, [
+    question.id,
+    question.readAloudText,
+    question.promptText,
+    isMuted,
+    isElevenLabsConfigured,
+    autoReadVoice,
+    speak,
+  ]);
+
   const handleReadAloud = useCallback(() => {
-    speak(question.readAloudText || question.promptText);
+    void speak(question.readAloudText || question.promptText, { force: true });
   }, [question, speak]);
 
   const handleEvaluateAnswer = (answerToCheck: ClockTime) => {
@@ -125,6 +152,12 @@ const QuestionPlayArea: React.FC<QuestionPlayAreaProps> = ({
       const cheers = strings.mascot.correctCelebration;
       const cheer = cheers[Math.floor(Math.random() * cheers.length)];
       setMascotMessage(cheer);
+
+      if (!isMuted && isElevenLabsConfigured && autoReadVoice) {
+        setTimeout(() => {
+          void speak(cheer);
+        }, 250);
+      }
 
       setTimeout(() => {
         setIsEvaluating(false);
@@ -148,15 +181,25 @@ const QuestionPlayArea: React.FC<QuestionPlayAreaProps> = ({
         setIsEvaluating(false);
 
         if (newAttempts === 1) {
-          setMascotMessage(diag.message || strings.mascot.wrongAttempt1);
+          const msg = diag.message || strings.mascot.wrongAttempt1;
+          setMascotMessage(msg);
+          if (!isMuted && isElevenLabsConfigured && autoReadVoice) {
+            void speak(msg);
+          }
         } else if (newAttempts === 2) {
           setShowHintModal(true);
           setMascotMessage(diag.message);
+          if (!isMuted && isElevenLabsConfigured && autoReadVoice) {
+            void speak(diag.message);
+          }
         } else {
           setClockTime(question.targetTime);
           setRevealedSolution(true);
           setShowHintModal(true);
           setMascotMessage(strings.mascot.revealedNotice);
+          if (!isMuted && isElevenLabsConfigured && autoReadVoice) {
+            void speak(strings.mascot.revealedNotice);
+          }
         }
       }, 500);
     }
@@ -278,6 +321,7 @@ const QuestionPlayArea: React.FC<QuestionPlayAreaProps> = ({
                 question={question}
                 onReadAloud={handleReadAloud}
                 isSpeaking={isSpeaking}
+                isElevenLabsActive={isElevenLabsConfigured}
                 showHandLegend={levelId < 5}
               />
             </div>
@@ -327,6 +371,7 @@ const QuestionPlayArea: React.FC<QuestionPlayAreaProps> = ({
                 <Mascot
                   message={mascotMessage}
                   showGhostHand={false}
+                  onSpeak={() => void speak(mascotMessage, { force: true })}
                 />
               </div>
 
@@ -363,6 +408,7 @@ const QuestionPlayArea: React.FC<QuestionPlayAreaProps> = ({
         attemptNumber={attempts}
         revealed={revealedSolution}
         onDismiss={handleDismissHint}
+        onSpeak={diagnostic ? () => void speak(diagnostic.message, { force: true }) : undefined}
       />
     </>
   );
@@ -391,6 +437,20 @@ export const PlayScreen: React.FC<PlayScreenProps> = ({
   const [questionIndex, setQuestionIndex] = useState(0);
   const [starsPerQuestion, setStarsPerQuestion] = useState<number[]>([]);
   const [showSuccessConfetti, setShowSuccessConfetti] = useState(false);
+  const [showVoiceSettings, setShowVoiceSettings] = useState(false);
+
+  const {
+    speak,
+    stop,
+    isSpeaking,
+    isElevenLabsConfigured,
+    voiceSettings,
+    lastError,
+  } = useSpeech({ isMuted });
+
+  useEffect(() => {
+    return () => stop();
+  }, [stop]);
 
   const currentQ = questions[questionIndex] || questions[0];
 
@@ -430,6 +490,8 @@ export const PlayScreen: React.FC<PlayScreenProps> = ({
         onToggleMute={onToggleMute}
         onToggleTextSize={onToggleTextSize}
         onPause={onPause}
+        onOpenVoiceSettings={() => setShowVoiceSettings(true)}
+        isElevenLabsConfigured={isElevenLabsConfigured}
         className="shrink-0 max-w-7xl"
       />
 
@@ -441,6 +503,11 @@ export const PlayScreen: React.FC<PlayScreenProps> = ({
         accentColor={config.accentColor}
         locomotiveStyle={config.locomotiveStyle}
         showDigitalBubble={showDigitalBubble}
+        isMuted={isMuted}
+        speak={speak}
+        isSpeaking={isSpeaking}
+        isElevenLabsConfigured={isElevenLabsConfigured}
+        autoReadVoice={voiceSettings.autoRead}
         playTick={playTick}
         playWhistle={playWhistle}
         playChuff={playChuff}
@@ -448,6 +515,16 @@ export const PlayScreen: React.FC<PlayScreenProps> = ({
         onRecordMistake={onRecordMistake}
         onSuccess={handleQuestionSuccess}
       />
+
+      {showVoiceSettings && (
+        <VoiceSettingsModal
+          isElevenLabsConfigured={isElevenLabsConfigured}
+          lastError={lastError}
+          isSpeaking={isSpeaking}
+          onTestVoice={(sampleText) => void speak(sampleText, { force: true })}
+          onClose={() => setShowVoiceSettings(false)}
+        />
+      )}
     </div>
   );
 };

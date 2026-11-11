@@ -1,8 +1,10 @@
 import React, { useState, useRef } from 'react';
-import { Volume2, VolumeX, Type, Settings, Play, Map, HelpCircle } from 'lucide-react';
+import { Volume2, VolumeX, Type, Settings, Play, Map, HelpCircle, Mic } from 'lucide-react';
 import { TrainLocomotive } from '../scene/TrainLocomotive';
 import { Mascot } from '../scene/Mascot';
 import { strings } from '../../strings/strings.en';
+import { useSpeech } from '../../hooks/useSpeech';
+import { VoiceSettingsModal } from '../game/VoiceSettingsModal';
 
 export interface HomeScreenProps {
   onPlay: () => void;
@@ -25,6 +27,13 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
 }) => {
   const [pressProgress, setPressProgress] = useState(0);
   const [showHowToPlay, setShowHowToPlay] = useState(false);
+  const [showVoiceSettings, setShowVoiceSettings] = useState(false);
+  const {
+    speak,
+    isSpeaking,
+    isElevenLabsConfigured,
+    lastError,
+  } = useSpeech({ isMuted });
   const holdTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const holdIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
@@ -79,6 +88,31 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
             aria-label="Toggle text size"
           >
             <Type className="w-6 h-6" />
+          </button>
+
+          {/* Voice Settings Button */}
+          <button
+            type="button"
+            onClick={() => setShowVoiceSettings(true)}
+            className={`flex items-center justify-center gap-1.5 px-3 h-12 rounded-2xl border-3 border-[#1B2A49] shadow-chunky-sm active:translate-y-0.5 font-black text-sm ${
+              isElevenLabsConfigured
+                ? 'bg-violet-100 hover:bg-violet-200 text-violet-900'
+                : 'bg-amber-100 hover:bg-amber-200 text-[#1B2A49]'
+            }`}
+            title={
+              isElevenLabsConfigured
+                ? 'ElevenLabs Realistic Voice active'
+                : 'Set up ElevenLabs Realistic Voice'
+            }
+            aria-label="Open voice settings"
+          >
+            <Mic className="w-5 h-5" />
+            <span className="hidden sm:inline">Voice</span>
+            <span
+              className={`w-2.5 h-2.5 rounded-full ${
+                isElevenLabsConfigured ? 'bg-emerald-500' : 'bg-amber-500'
+              }`}
+            />
           </button>
 
           {/* Sound Toggle */}
@@ -161,7 +195,10 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
 
       {/* Bottom Mascot Welcome */}
       <footer className="w-full max-w-4xl mx-auto flex items-end justify-between">
-        <Mascot message={strings.mascot.greeting} />
+        <Mascot
+          message={strings.mascot.greeting}
+          onSpeak={() => void speak(strings.mascot.greeting, { force: true })}
+        />
 
         <div className="hidden sm:block text-xs text-[#1B2A49] font-bold opacity-75">
           Classes 2–4 • Ages 7–10 • Accessible
@@ -207,6 +244,17 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
             </button>
           </div>
         </div>
+      )}
+
+      {/* Realistic ElevenLabs Voice Settings Modal */}
+      {showVoiceSettings && (
+        <VoiceSettingsModal
+          isElevenLabsConfigured={isElevenLabsConfigured}
+          lastError={lastError}
+          isSpeaking={isSpeaking}
+          onTestVoice={(sampleText) => void speak(sampleText, { force: true })}
+          onClose={() => setShowVoiceSettings(false)}
+        />
       )}
     </div>
   );

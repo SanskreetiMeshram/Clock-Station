@@ -1,14 +1,17 @@
 import React from 'react';
+import { Volume2 } from 'lucide-react';
 
 export interface MascotProps {
   message?: string;
   showGhostHand?: boolean;
+  onSpeak?: () => void;
   className?: string;
 }
 
 export const Mascot: React.FC<MascotProps> = ({
   message,
   showGhostHand = false,
+  onSpeak,
   className = '',
 }) => {
   return (
@@ -59,7 +62,20 @@ export const Mascot: React.FC<MascotProps> = ({
       {/* Speech Bubble */}
       {message && (
         <div className="relative mb-4 bg-white text-[#1B2A49] font-bold text-sm sm:text-base px-4 py-2.5 rounded-2xl rounded-bl-none border-2 border-[#1B2A49] shadow-chunky-sm max-w-[280px] sm:max-w-[340px]">
-          {message}
+          <div className="flex items-start gap-2">
+            <span className="flex-1">{message}</span>
+            {onSpeak && (
+              <button
+                type="button"
+                onClick={onSpeak}
+                className="shrink-0 mt-0.5 p-1.5 rounded-xl bg-amber-100 hover:bg-amber-200 text-[#1B2A49] border border-[#1B2A49]/25 transition-colors active:scale-95"
+                title="Hear conductor speak"
+                aria-label="Read conductor message aloud"
+              >
+                <Volume2 className="w-4 h-4" />
+              </button>
+            )}
+          </div>
           {/* Bubble Tail */}
           <div className="absolute -bottom-2 left-2 w-0 h-0 border-t-8 border-t-white border-r-8 border-r-transparent border-l-8 border-l-transparent" />
         </div>

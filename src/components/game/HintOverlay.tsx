@@ -1,5 +1,5 @@
 import React from 'react';
-import { Lightbulb, CheckCircle2 } from 'lucide-react';
+import { Lightbulb, CheckCircle2, Volume2 } from 'lucide-react';
 import type { MistakeDiagnostic } from '../../types/game';
 
 export interface HintOverlayProps {
@@ -7,6 +7,7 @@ export interface HintOverlayProps {
   attemptNumber: number;
   revealed?: boolean;
   onDismiss: () => void;
+  onSpeak?: () => void;
   className?: string;
 }
 
@@ -15,6 +16,7 @@ export const HintOverlay: React.FC<HintOverlayProps> = ({
   attemptNumber,
   revealed = false,
   onDismiss,
+  onSpeak,
   className = '',
 }) => {
   if (!diagnostic) return null;
@@ -46,9 +48,22 @@ export const HintOverlay: React.FC<HintOverlayProps> = ({
         </h3>
 
         {/* Message */}
-        <p className="text-base sm:text-lg text-slate-700 font-bold mb-6 leading-relaxed">
+        <p className="text-base sm:text-lg text-slate-700 font-bold mb-4 leading-relaxed">
           {diagnostic.message}
         </p>
+
+        {onSpeak && (
+          <button
+            type="button"
+            onClick={onSpeak}
+            className="mb-5 inline-flex items-center gap-2 px-4 py-2 rounded-2xl bg-amber-100 hover:bg-amber-200 text-[#1B2A49] font-black text-sm border-2 border-[#1B2A49] shadow-chunky-sm active:translate-y-0.5 transition-colors"
+            title="Hear station master tip aloud"
+            aria-label="Read hint aloud"
+          >
+            <Volume2 className="w-4 h-4" />
+            <span>Listen to Tip</span>
+          </button>
+        )}
 
         {/* Action Button */}
         <button

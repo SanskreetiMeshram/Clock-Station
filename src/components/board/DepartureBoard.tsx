@@ -8,6 +8,7 @@ export interface DepartureBoardProps {
   question: Question;
   onReadAloud?: () => void;
   isSpeaking?: boolean;
+  isElevenLabsActive?: boolean;
   showHandLegend?: boolean;
   className?: string;
 }
@@ -16,6 +17,7 @@ export const DepartureBoard: React.FC<DepartureBoardProps> = ({
   question,
   onReadAloud,
   isSpeaking = false,
+  isElevenLabsActive = false,
   showHandLegend = true,
   className = '',
 }) => {
@@ -54,11 +56,11 @@ export const DepartureBoard: React.FC<DepartureBoardProps> = ({
                 ? 'bg-amber-400 text-[#1B2A49] animate-pulse ring-2 ring-amber-300'
                 : 'bg-slate-700/80 hover:bg-slate-600 text-amber-300 hover:text-white'
             }`}
-            title="Read task aloud"
+            title={isElevenLabsActive ? 'Read task aloud with ElevenLabs realistic voice' : 'Read task aloud'}
             aria-label="Read question text aloud"
           >
             <Volume2 className="w-4 h-4" />
-            <span className="hidden sm:inline">Read aloud</span>
+            <span className="hidden sm:inline">{isElevenLabsActive ? '✨ HD Read aloud' : 'Read aloud'}</span>
           </button>
         )}
       </div>
